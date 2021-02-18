@@ -27,9 +27,33 @@ def translate_sequence(rna_sequence, genetic_code):
     -------
     str
         A string of the translated amino acids.
-    """
-    pass
+    """    
+    rna_sequence = rna_sequence.upper()
+    #protein = []
+    #for i in range(0, len(rna_sequence)-(3+len(rna_sequence)%3), 3):
+    	#if genetic_code[rna_sequence[i:i+3]] == "*":
+    	    #break
+    	#protein += genetic_code[rna_sequence[i:i+3]]
+    #return "".join(protein)
 
+    rna_sequence = rna_sequence.upper()
+    peptide = []
+    #while True:
+    	#if len(rna_sequence) < 3:
+        	#break
+    	#codon, remaining_sequence = next_codon(rna_sequence)
+    	#rna_sequence = remaining_sequence
+    	#aa = genetic_code[codon]
+    if len(rna_sequence)%3 == 0:
+    	for i in range(0, len(rna_sequence),3):
+    	    codon = rna_sequence[i:i + 3]
+    	    if genetic_code[codon] == "*":
+    	    	break
+    	    elif len(rna_sequence) < 3:
+    	    	break
+    	    peptide += genetic_code[codon]	
+    return "".join(peptide)
+    
 def get_all_translations(rna_sequence, genetic_code):
     """Get a list of all amino acid sequences encoded by an RNA sequence.
 
@@ -75,7 +99,8 @@ def get_reverse(sequence):
     >>> get_reverse('AUGC')
     'CGUA'
     """
-    pass
+    sequence=sequence.upper()	
+    return sequence [::-1]
 
 def get_complement(sequence):
     """Get the complement of a `sequence` of nucleotides.
@@ -89,7 +114,10 @@ def get_complement(sequence):
     >>> get_complement('AUGC')
     'UACG'
     """
-    pass
+    sequence=sequence.upper()
+    complement = {'A': 'U', 'C': 'G', 'G': 'C', 'U': 'A'}
+    return "".join(complement[n] for n in sequence)
+    
 
 def reverse_and_complement(sequence):
     """Get the reversed and complemented form of a `sequence` of nucleotides.
@@ -104,7 +132,7 @@ def reverse_and_complement(sequence):
     >>> reverse_and_complement('AUGC')
     'GCAU'
     """
-    pass
+    return get_complement(sequence[::-1])
 
 def get_longest_peptide(rna_sequence, genetic_code):
     """Get the longest peptide encoded by an RNA sequence.
