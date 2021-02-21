@@ -31,27 +31,34 @@ def translate_sequence(rna_sequence, genetic_code):
     rna_sequence = rna_sequence.upper()
     #protein = []
     #for i in range(0, len(rna_sequence)-(3+len(rna_sequence)%3), 3):
-    	#if genetic_code[rna_sequence[i:i+3]] == "*":
-    	    #break
-    	#protein += genetic_code[rna_sequence[i:i+3]]
+        #if genetic_code[rna_sequence[i:i+3]] == "*":
+            #break
+        #protein += genetic_code[rna_sequence[i:i+3]]
     #return "".join(protein)
 
     rna_sequence = rna_sequence.upper()
     peptide = []
-    #while True:
-    	#if len(rna_sequence) < 3:
-        	#break
-    	#codon, remaining_sequence = next_codon(rna_sequence)
-    	#rna_sequence = remaining_sequence
-    	#aa = genetic_code[codon]
-    if len(rna_sequence)%3 == 0:
-    	for i in range(0, len(rna_sequence),3):
-    	    codon = rna_sequence[i:i + 3]
-    	    if genetic_code[codon] == "*":
-    	    	break
-    	    elif len(rna_sequence) < 3:
-    	    	break
-    	    peptide += genetic_code[codon]	
+    print("\n\nOriginal rna_sequence: " + rna_sequence)    
+#    while True:
+#        if len(rna_sequence) < 3:
+#            break
+#    print("\n\nOriginal rna_sequence: " + rna_sequence)
+#        codon, remaining_sequence = next_codon(rna_sequence)
+#        rna_sequence = remaining_sequence
+#        aa = genetic_code[codon]
+    if len(rna_sequence) > 2:
+        print("in if len(rna_sequence)%3 == 0")
+        for i in range(0, len(rna_sequence),3):
+            print("for i in range")
+            codon = rna_sequence[i:i + 3]
+            print(codon)            
+            if len(codon) < 3:
+                print(rna_sequence)                
+                break
+            elif genetic_code[codon] == "*":
+                print("*")                
+                break
+            peptide += genetic_code[codon]    
     return "".join(peptide)
     
 def get_all_translations(rna_sequence, genetic_code):
@@ -85,7 +92,67 @@ def get_all_translations(rna_sequence, genetic_code):
         A list of strings; each string is an sequence of amino acids encoded by
         `rna_sequence`.
     """
-    pass
+    def gen_reading_frames(rna_sequence, genetic_code):
+        """Generate the six reading frames of a DNA sequence"""
+        """including reverse complement"""
+    
+        frames = []
+        frames.append(translate_sequence(sequence, 0))
+        frames.append(translate_sequence(sequence, 1))
+        frames.append(translate_sequence(sequence, 2))
+	frames.append(translate_sequence(reverse_and_complement(sequence), 0))
+	frames.append(translate_sequence(reverse_and_complement(sequence), 1))
+	frames.append(translate_sequence(reverse_and_complement(sequence), 2))
+	return frames    
+	print('[9] + Reading_frames:')
+	rna_sequence=rna_sequence.upper()
+	for frames in gen_reading_frames(rna_sequence):
+	print(frames)
+
+	def proteins_from_rf(aa_seq):
+	    """Compute all possible proteins in an aminoacid"""
+	    """seq and return a list of possible proteins"""
+	    current_prot = []
+	    proteins = []
+	    for aa in aa_seq:
+		if aa == "*":
+		    # STOP accumulating amino acids if _ - STOP was found
+		    if current_prot:
+			for p in current_prot:
+			    proteins.append(p)
+			current_prot = []
+		else:
+		    # START accumulating amino acids if M - START was found
+		    if aa == "M":
+			current_prot.append("")
+		    for i in range(len(current_prot)):
+			current_prot[i] += aa
+	    return proteins
+	    print(proteins_from_rf(['I', 'M', 'T', 'H', 'T',
+				'Q', 'G', 'N', 'V', 'A', 'Y', 'I', '_']))
+
+	def all_proteins_from_orfs(seq, startReadPos=0, endReadPos=0, ordered=False:
+	    """Compute all possible proteins for all open reading frames"""
+	    """Protine Search DB: https://www.ncbi.nlm.nih.gov/nuccore/NM_001185097.2"""
+	    """API can be used to pull protein info"""
+	    if endReadPos > startReadPos:
+		rfs = gen_reading_frames(seq[startReadPos: endReadPos])
+	    else:
+		rfs = gen_reading_frames(seq)
+
+	    res = []
+	    for rf in rfs:
+		prots = proteins_from_rf(rf)
+		for p in prots:
+		    res.append(p)
+
+	    if ordered:
+		return sorted(res, key=len, reverse=True)
+	    return res
+
+	print('\n[10] + All prots in 6 open reading frames:')
+	for prot in all_proteins_from_orfs(rna_sequence, 0, 0, True):
+	    print(f'{prot}')
 
 def get_reverse(sequence):
     """Reverse orientation of `sequence`.
@@ -99,7 +166,7 @@ def get_reverse(sequence):
     >>> get_reverse('AUGC')
     'CGUA'
     """
-    sequence=sequence.upper()	
+    sequence=sequence.upper()    
     return sequence [::-1]
 
 def get_complement(sequence):
